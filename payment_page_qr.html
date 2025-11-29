@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pragyan Contribution Checkout | UPI Preferred</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        // --- Tailwind Configuration ---
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        samrion: { red: '#E11D48' },
+                        pragyan: { blue: '#0EA5E9' },
+                        bg: { main: '#0F172A', card: '#1E293B' }
+                    }
+                }
+            }
+        }
+
+        // --- Frontend Logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const amountInput = document.getElementById('custom-amount');
+            const tierButtons = document.querySelectorAll('.tier-button');
+            const upiIdSpan = document.getElementById('upi-id-display');
+            
+            // ⚠️ 1. IMPORTANT: REPLACE THIS WITH YOUR PARENT'S ACTUAL UPI ID ⚠️
+            const UPI_ID = 'nitinmatrix101@upi'; 
+            upiIdSpan.textContent = UPI_ID; 
+
+            let selectedAmount = 999; 
+
+            // Function to update the selected amount
+            function updateSelection(amount) {
+                selectedAmount = amount;
+                amountInput.value = amount;
+
+                // Update button styles
+                tierButtons.forEach(btn => {
+                    if (parseInt(btn.dataset.amount) === amount) {
+                        btn.classList.remove('border-slate-700', 'bg-bg-card');
+                        btn.classList.add('border-pragyan-blue', 'bg-pragyan-blue/20');
+                    } else {
+                        btn.classList.remove('border-pragyan-blue', 'bg-pragyan-blue/20');
+                        btn.classList.add('border-slate-700', 'bg-bg-card');
+                    }
+                });
+            }
+
+            // Handle tier button clicks
+            tierButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    updateSelection(parseInt(button.dataset.amount));
+                });
+            });
+
+            // Handle custom amount input
+            amountInput.addEventListener('input', () => {
+                const value = parseInt(amountInput.value);
+                if (value >= 10 && !isNaN(value)) {
+                    selectedAmount = value;
+                }
+                // Deselect all tier buttons when custom amount is entered
+                tierButtons.forEach(btn => {
+                    btn.classList.remove('border-pragyan-blue', 'bg-pragyan-blue/20');
+                    btn.classList.add('border-slate-700', 'bg-bg-card');
+                });
+            });
+
+            // Initial setup for the default selected amount (999)
+            updateSelection(999); 
+        });
+    </script>
+</head>
+<body class="bg-bg-main text-slate-200 font-sans min-h-screen flex items-center justify-center py-12">
+
+    <div class="w-full max-w-lg mx-auto p-6 md:p-10 bg-bg-card rounded-xl shadow-2xl border border-slate-800">
+        
+        <div class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-pragyan-blue">Contribute to Pragyan</h1>
+            <p class="text-slate-400 mt-2">Zero fees, instant impact. Thank you for your support!</p>
+        </div>
+
+        <form id="payment-form">
+             <!-- Back Button -->
+            <a href="./index.html" class="inline-flex items-center text-sm text-slate-400 hover:text-white mb-6">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Back to Homepage
+            </a>
+            
+            <!-- Amount Selection Tiers -->
+            <h3 class="text-lg font-semibold mb-3 text-white">1. Select Contribution Tier:</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+                
+                <button type="button" class="tier-button p-3 rounded-lg border-2 bg-bg-card hover:border-pragyan-blue/50 transition duration-300" data-amount="999">
+                    <span class="text-xl font-bold block text-pragyan-blue">₹999</span>
+                    <span class="text-xs text-slate-400">Mini-Model</span>
+                </button>
+                
+                <button type="button" class="tier-button p-3 rounded-lg border-2 bg-bg-card hover:border-pragyan-blue/50 transition duration-300" data-amount="4999">
+                    <span class="text-xl font-bold block text-pragyan-blue">₹4,999</span>
+                    <span class="text-xs text-slate-400">Visionary</span>
+                </button>
+
+                <button type="button" class="tier-button p-3 rounded-lg border-2 bg-bg-card hover:border-pragyan-blue/50 transition duration-300" data-amount="9999">
+                    <span class="text-xl font-bold block text-pragyan-blue">₹9,999+</span>
+                    <span class="text-xs text-slate-400">Major Sponsor</span>
+                </button>
+            </div>
+
+            <!-- Custom Amount Input -->
+            <div class="mb-8 relative">
+                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-2xl text-slate-500">₹</span>
+                <input type="number" id="custom-amount" min="10" placeholder="Or Enter Custom Amount (Min ₹10)" 
+                       class="w-full bg-bg-main border border-slate-700 rounded-lg py-3 pl-10 pr-4 text-white text-xl focus:border-pragyan-blue focus:ring-pragyan-blue transition duration-200">
+            </div>
+
+            <!-- UPI Payment Section -->
+            <div class="bg-bg-main p-6 rounded-xl border border-slate-700 text-center">
+                <h3 class="text-lg font-semibold mb-4 text-white flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-mobile-screen-button text-green-400"></i>
+                    2. Complete UPI Payment
+                </h3>
+
+                <div id="qr-code-display" class="mb-4">
+                    <!-- QR Code Image - Uses uploaded file in assets/ -->
+                    <img src="./assets/upi_qr_code.png" alt="Scan QR Code to Pay" 
+                        class="w-48 h-48 mx-auto rounded-xl border-4 border-pragyan-blue shadow-lg shadow-pragyan-blue/30"/>
+                    <p class="text-sm text-slate-400 mt-2">Scan with Google Pay, PhonePe, or BHIM.</p>
+                </div>
+                
+                <p class="text-sm text-slate-400 mb-2">Or Pay Directly to UPI ID:</p>
+                <div class="bg-slate-800 p-3 rounded-lg inline-block">
+                    <span id="upi-id-display" class="font-mono text-lg text-pragyan-blue font-bold">YOUR-PARENTS-UPI-ID-HERE@upi</span>
+                </div>
+
+                <div class="mt-4 p-3 bg-red-900/20 text-red-300 rounded-lg border border-red-700 text-sm">
+                    <i class="fa-solid fa-triangle-exclamation mr-2"></i> 
+                    **Important:** Since this is a manual donation, please share the transaction receipt with your email (**nitinraj.email@samrion.in**) to receive your sponsor rewards!
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
+
