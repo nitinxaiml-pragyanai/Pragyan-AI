@@ -1,0 +1,32 @@
+name: Deploy React App to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # Only run this workflow when changes are pushed to the main branch
+      - master # Include master branch if you use it
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18' # Use a stable Node version
+
+      - name: Install dependencies 📦
+        run: npm install
+
+      - name: Run the build script ⚙️
+        run: npm run build
+
+      - name: Deploy to GitHub Pages 🚀
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build # Tells it to deploy the output from the npm run build step
+          # Keep the destination branch as gh-pages (default)
