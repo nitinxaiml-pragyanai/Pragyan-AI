@@ -3,12 +3,20 @@ name: Deploy React App to GitHub Pages
 on:
   push:
     branches:
-      - main  # Only run this workflow when changes are pushed to the main branch
-      - master # Include master branch if you use it
+      - main  # Run when changes are pushed to the main branch
+      - master
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    
+    # FIX for Permission Denied (403 Error): 
+    # This grants the necessary write access for the bot to push to the gh-pages branch.
+    permissions:
+      contents: write  # Allows the action to push files to the gh-pages branch
+      pages: write     # Allows the action to manage Pages deployment
+      id-token: write  # Required for Pages deployments using OIDC
+    
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v4
@@ -16,19 +24,19 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
         with:
-          node-version: '18' # Use a stable Node version
+          node-version: '18' 
 
       - name: Install dependencies 📦
         run: npm install
 
-      # --- This is the step that was causing the error ---
       - name: Run the build script ⚙️
-        # We explicitly set PUBLIC_URL to the root path and CI=false to allow warnings.
+        # We explicitly set PUBLIC_URL to the root path for GitHub Pages and 
+        # CI=false to allow warnings, preventing the process from failing on warnings.
         run: CI=false PUBLIC_URL=/ npm run build
 
       - name: Deploy to GitHub Pages 🚀
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build # Tells it to deploy the output from the npm run build step
-          # The destination branch is gh-pages (default)
+          publish_dir: ./build # Deploys the generated output folder
+          # Destination branch defaults to 'gh-pages'
