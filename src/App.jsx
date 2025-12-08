@@ -7,7 +7,7 @@ import LandingPage from './LandingPage'; // Holds the content of your original i
 import PaymentFlow from './payment';     // Your contribution component
 
 // Rename the imported component to avoid conflict with the surrounding App component
-import AdminPanel from './Admin';        // Your fully functional Admin Dashboard
+import AdminPanel from './admin';        // Your fully functional Admin Dashboard
 
 // A simple header/nav that appears on all pages (Optional but useful for context)
 const SiteHeader = () => (
