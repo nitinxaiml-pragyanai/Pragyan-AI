@@ -21,16 +21,14 @@ jobs:
       - name: Install dependencies 📦
         run: npm install
 
+      # --- This is the step that was causing the error ---
       - name: Run the build script ⚙️
-        run: npm run build
+        # We explicitly set PUBLIC_URL to the root path and CI=false to allow warnings.
+        run: CI=false PUBLIC_URL=/ npm run build
 
       - name: Deploy to GitHub Pages 🚀
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build # Tells it to deploy the output from the npm run build step
-          # Keep the destination branch as gh-pages (default)
-
-          - name: Run the build script ⚙️
-        run: CI=false PUBLIC_URL=/ npm run build # Set CI=false to allow warnings and PUBLIC_URL=/
-        # Add the environment variable to tell the build script the public path is the root
+          # The destination branch is gh-pages (default)
