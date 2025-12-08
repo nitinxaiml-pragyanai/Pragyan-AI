@@ -2,14 +2,13 @@
   "name": "pragyan-ai-app",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://nitinxaiml.github.io/Pragyan-AI", 
+  "homepage": "https://nitinxaiml-pragyanai.github.io/Pragyan-AI",
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.20.0",  <-- ADD THE COMMA HERE
+    "react-router-dom": "^6.20.0",
     "firebase": "^9.23.0" 
-},
-},
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
