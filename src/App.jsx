@@ -4,7 +4,7 @@ import { HashRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
 // --- Import All Pages ---
 import LandingPage from './LandingPage'; // Holds the content of your original index.html
-import PaymentFlow from './Payment';     // Your contribution component
+import PaymentFlow from './payment';     // Your contribution component
 
 // Rename the imported component to avoid conflict with the surrounding App component
 import AdminPanel from './Admin';        // Your fully functional Admin Dashboard
