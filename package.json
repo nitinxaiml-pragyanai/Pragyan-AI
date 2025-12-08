@@ -2,7 +2,7 @@
   "name": "pragyan-ai-app",
   "version": "0.1.0",
   "private": true,
-  "homepage": ".",
+  "homepage": "https://nitinxaiml-pragyanai.github.io/Pragyan-AI",
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
