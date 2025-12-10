@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contribute to Pragyan AI | Fueling India's Open Source AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Space+Grotesk:wght=700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
@@ -35,6 +35,11 @@
             box-shadow: 0 0 20px rgba(14, 165, 233, 0.7);
             transform: translateY(-4px) scale(1.03);
         }
+        /* Mobile adjustment for QR image */
+        #qrCodeImage {
+            max-width: 80%;
+            height: auto;
+        }
     </style>
 </head>
 <body class="bg-bg-main text-slate-200 antialiased min-h-screen pb-12">
@@ -42,8 +47,8 @@
     <!-- Navigation -->
     <nav class="sticky top-0 z-10 bg-bg-card shadow-lg border-b border-slate-700/50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
-            <a href="./index.html" class="text-2xl font-display font-bold text-pragyan-blue">Pragyan AI</a>
-            <a href="./index.html" class="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-slate-700 hover:text-white transition">
+            <a href="#" class="text-2xl font-display font-bold text-pragyan-blue">Pragyan AI</a>
+            <a href="#" class="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-slate-700 hover:text-white transition">
                 <i class="fa-solid fa-house mr-1"></i> Home
             </a>
         </div>
@@ -99,7 +104,7 @@
                 <div class="p-6 bg-slate-800 rounded-xl border-2 border-samrion-red/50 shadow-lg mb-6">
                     <p class="text-slate-300 mb-4 text-lg">Total Amount: <span id="displayAmount" class="text-pragyan-blue font-extrabold text-2xl ml-2">₹0.00</span></p>
                     
-                    <!-- QR CODE PLACEMENT: Replace the src with your actual UPI QR Code image URL -->
+                    <!-- QR CODE PLACEMENT: Placeholder image for UPI QR Code -->
                     <img id="qrCodeImage" src="https://placehold.co/256x256/0EA5E9/ffffff?text=UPI+QR+CODE" alt="UPI QR Code" class="mx-auto w-48 h-48 rounded-lg shadow-xl mb-4" />
                     
                     <p class="text-white font-mono text-lg break-all bg-slate-700 p-2 rounded-md inline-block">
@@ -141,31 +146,26 @@
                     <button type="submit" id="submitButton" disabled class="w-full flex justify-center items-center py-3 px-4 rounded-lg shadow-lg text-lg font-bold text-white bg-samrion-red hover:bg-samrion-red/90 focus:outline-none focus:ring-4 focus:ring-samrion-red/50 disabled:opacity-50 transition duration-150 transform hover:scale-[1.01]">
                         <i class="fa-solid fa-check-circle mr-2"></i> Submit for Verification & Receipt
                     </button>
-
-                    <p id="authUserId" class="text-xs text-slate-600 text-center break-all pt-2"></p>
                 </form>
+                
+                <div class="mt-4 p-3 bg-slate-800 rounded-lg text-xs text-slate-500 text-center">
+                    <p>
+                        <i class="fa-solid fa-cloud"></i> After deployment, you MUST update the 
+                        <code class="font-mono text-pragyan-blue">functionUrl</code> variable in this file's script 
+                        with the HTTPS URL from Firebase Functions.
+                    </p>
+                </div>
             </div>
             
         </div>
     </div>
     
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, addDoc, collection, query, where, getDocs, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // --- Setup Globals ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        // Updated Firebase Config as fallback
-        const defaultFirebaseConfigJson = '{"apiKey": "AIzaSyAq-LjX9z7hEdsB_2oXTjfYFE77OT-3X0I", "authDomain": "pragyanalpha.firebaseapp.com", "projectId": "pragyanalpha", "storageBucket": "pragyanalpha.firebasestorage.app", "messagingSenderId": "788103367384", "appId": "1:788103367384:web:d742f0c8187bd1679c65ad", "measurementId": "G-RHZ4W6J7T0"}';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : defaultFirebaseConfigJson);
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+    <script>
+        // --- Configuration ---
+        // !!! IMPORTANT !!! REPLACE THIS URL AFTER DEPLOYMENT (Phase 3, Step 3)
+        // Example: https://us-central1-pragyanalpha.cloudfunctions.net/submitReceipt
+        const functionUrl = 'https://us-central1-YOUR-FIREBASE-PROJECT-ID.cloudfunctions.net/submitReceipt';
         
-        let db, auth;
-        let userId = null;
-        let isAuthReady = false;
-        let selectedAmount = 0;
-
         // --- UI Elements ---
         const form = document.getElementById('contributionForm');
         const submitButton = document.getElementById('submitButton');
@@ -174,12 +174,14 @@
         const finalAmountInput = document.getElementById('finalAmount');
         const customAmountInput = document.getElementById('customAmount');
         const tierCards = document.querySelectorAll('.tier-card');
-        const authUserId = document.getElementById('authUserId');
-
+        
+        let selectedAmount = 0;
 
         // --- UI Helpers ---
         function showMessage(type, message) {
             statusMessage.classList.remove('hidden', 'bg-red-500/20', 'text-red-300', 'bg-green-500/20', 'text-green-300', 'bg-yellow-500/20', 'text-yellow-300');
+            statusMessage.classList.remove('bg-red-500/20', 'text-red-300', 'bg-green-500/20', 'text-green-300', 'bg-yellow-500/20', 'text-yellow-300'); // Clean slate
+
             if (type === 'success') {
                 statusMessage.classList.add('bg-green-500/20', 'text-green-300');
             } else if (type === 'error') {
@@ -196,8 +198,8 @@
             displayAmount.textContent = `₹${selectedAmount.toFixed(2)}`;
             finalAmountInput.value = selectedAmount;
             
-            // Enable button only if amount is > 0 AND auth is ready
-            submitButton.disabled = selectedAmount <= 0 || !isAuthReady;
+            // Enable button only if amount is greater than 0
+            submitButton.disabled = selectedAmount <= 0;
             
             // Highlight selected tier
             tierCards.forEach(card => card.classList.remove('selected'));
@@ -212,13 +214,12 @@
             card.addEventListener('click', () => {
                 const amount = parseFloat(card.dataset.amount);
                 if (amount === 2001) {
-                    // Custom tier selected, focus on input
                     customAmountInput.value = '';
                     customAmountInput.focus();
-                    updateAmount(0); // Reset amount until user enters value
-                    card.classList.add('selected'); // Keep custom card highlighted
+                    updateAmount(0);
+                    card.classList.add('selected'); 
                 } else {
-                    customAmountInput.value = ''; // Clear custom input
+                    customAmountInput.value = ''; 
                     updateAmount(amount);
                 }
             });
@@ -226,124 +227,63 @@
 
         customAmountInput.addEventListener('input', () => {
             const amount = parseFloat(customAmountInput.value);
-            // Remove selection from fixed tiers
             tierCards.forEach(card => {
                 if (card.dataset.amount !== "2001") card.classList.remove('selected');
             });
-            // Select the custom tier card
             document.querySelector(`.tier-card[data-amount="2001"]`).classList.add('selected');
 
-            if (amount > 0) {
+            if (amount >= 1) { // Minimum contribution of 1 rupee
                 updateAmount(amount);
             } else {
                 updateAmount(0);
             }
         });
 
-        // --- Firebase Initialization and Auth ---
-        async function initializeFirebase() {
-            try {
-                setLogLevel('debug');
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        userId = user.uid;
-                    } else if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                        userId = auth.currentUser.uid;
-                    } else {
-                        const anonUser = await signInAnonymously(auth);
-                        userId = anonUser.user.uid;
-                    }
-                    isAuthReady = true;
-                    authUserId.textContent = `Session ID: ${userId}`;
-                    if (selectedAmount > 0) submitButton.disabled = false;
-                });
-            } catch (e) {
-                console.error("Firebase setup failed:", e);
-                showMessage('error', "System Error: Could not connect to the database.");
-            }
-        }
-
-        // --- Duplicate UTR Check Logic ---
-        async function isTxnIdDuplicate(txnId) {
-            // We search across ALL users' receipts in the 'public' collection for UTR uniqueness
-            const receiptsPath = `artifacts/${appId}/public/data/all_receipts`;
-            const collectionRef = collection(db, receiptsPath);
-            
-            // Query for this Txn ID
-            const q = query(collectionRef, where('txnId', '==', txnId.trim()));
-            
-            try {
-                const querySnapshot = await getDocs(q);
-                // If a document with this UTR exists in the public unique list, it's a duplicate.
-                return !querySnapshot.empty; 
-            } catch (e) {
-                console.error("Error checking duplicate UTR:", e);
-                // Treat database error as non-duplicate to allow submission if possible (safeguard)
-                return false; 
-            }
-        }
-        
         // --- Form Submission Logic ---
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            if (!isAuthReady || !userId) {
-                showMessage('error', "Authentication not complete. Please wait a moment and try again.");
+            if (selectedAmount <= 0) {
+                showMessage('warning', "Please choose or enter a valid contribution amount (minimum ₹1).");
                 return;
             }
 
-            if (selectedAmount <= 0) {
-                showMessage('warning', "Please choose or enter a valid contribution amount.");
+            if (functionUrl.includes("YOUR-FIREBASE-PROJECT-ID")) {
+                showMessage('error', "Configuration Error: Please update the 'functionUrl' in the script with your deployed Firebase Function URL.");
                 return;
             }
 
             submitButton.disabled = true;
-            submitButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Verifying & Submitting...';
+            submitButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Submitting to Cloud Server...';
             statusMessage.classList.add('hidden');
-
-            const txnId = document.getElementById('txnId').value.trim();
-
-            if (await isTxnIdDuplicate(txnId)) {
-                showMessage('error', "Error: This Transaction ID (UTR) has already been submitted. Please double-check the ID or contact support.");
-                submitButton.innerHTML = '<i class="fa-solid fa-check-circle mr-2"></i> Submit for Verification & Receipt';
-                submitButton.disabled = false;
-                return;
-            }
 
             const data = {
                 name: document.getElementById('name').value,
                 email: document.getElementById('email').value,
                 amount: selectedAmount,
-                txnId: txnId,
-                userId: userId, // Store the contributor's session ID
-                timestamp: Date.now(),
-                status: 'Pending', // Crucial: Starts as Pending for admin review
+                txnId: document.getElementById('txnId').value.trim(),
             };
 
             try {
-                // 1. Save a copy of the receipt in the private user collection (for user reference)
-                const privateReceiptPath = `artifacts/${appId}/users/${userId}/receipts`;
-                await addDoc(collection(db, privateReceiptPath), data);
+                const response = await fetch(functionUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
                 
-                // 2. Save a copy in the admin-accessible collection (for admin review/UTR check)
-                const adminReceiptPath = `artifacts/${appId}/users/${userId}/receipts`; // Use same collection as admin has permission to view all users' receipts
-                await addDoc(collection(db, adminReceiptPath), data); 
+                const result = await response.json();
 
-                // 3. Save the UTR to a public collection for universal uniqueness checking (crucial for UPI payments)
-                const uniqueTxnRef = collection(db, `artifacts/${appId}/public/data/all_receipts`);
-                await addDoc(uniqueTxnRef, { txnId: txnId, timestamp: Date.now() });
-
-                showMessage('success', "Submission successful! We've saved your details. Your transaction will be manually verified shortly, and your confirmed receipt will be emailed to you.");
-                form.reset();
-                updateAmount(0); // Reset UI
+                if (response.ok) {
+                    showMessage('success', `Submission successful! ${result.message || 'Verification email sent.'}`);
+                    form.reset();
+                    updateAmount(0); // Reset UI
+                } else {
+                    // Handle errors returned by the Cloud Function (400, 500 status codes)
+                    throw new Error(result.message || 'Unknown error occurred on the server.');
+                }
             } catch (e) {
-                console.error("Error saving receipt:", e);
-                showMessage('error', `Submission failed: ${e.message}. If the issue persists, please refresh.`);
+                console.error("Error submitting receipt:", e);
+                showMessage('error', `Submission failed: ${e.message}`);
             } finally {
                 submitButton.disabled = false;
                 submitButton.innerHTML = '<i class="fa-solid fa-check-circle mr-2"></i> Submit for Verification & Receipt';
@@ -352,7 +292,6 @@
 
         // Initialize with default 0 amount
         updateAmount(0); 
-        initializeFirebase();
     </script>
 </body>
 </html>
