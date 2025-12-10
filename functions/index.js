@@ -27,6 +27,7 @@ const APP_ID = 'pragyanalpha';
 
 /**
  * HTTPS Callable Function to handle receipt submission.
+ * We are using functions.https.onRequest, not functions.https.onCall.
  */
 exports.submitReceipt = functions.https.onRequest(async (req, res) => {
     // 1. CORS Setup (Essential for GitHub Pages/External Hosting)
@@ -40,19 +41,22 @@ exports.submitReceipt = functions.https.onRequest(async (req, res) => {
     }
 
     if (req.method !== 'POST') {
-        return res.status(405).send({ message: 'Method Not Allowed. Use POST.' });
+        // FIXED: object-curly-spacing (no space after { and before })
+        return res.status(405).send({message:'Method Not Allowed. Use POST.'});
     }
 
     // 2. Input Validation
-    const { name, email, amount, txnId } = req.body;
+    const {name, email, amount, txnId} = req.body;
 
     if (!name || !email || !amount || !txnId) {
-        return res.status(400).json({ message: 'Missing required fields: name, email, amount, or UTR/Transaction ID.' });
+        // FIXED: object-curly-spacing
+        return res.status(400).json({message:'Missing required fields: name, email, amount, or UTR/Transaction ID.'});
     }
 
     const parsedAmount = parseFloat(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
-        return res.status(400).json({ message: 'Invalid contribution amount.' });
+        // FIXED: object-curly-spacing
+        return res.status(400).json({message:'Invalid contribution amount.'});
     }
 
     // 3. UTR Duplicate Check (Collection path uses the APP_ID)
@@ -60,7 +64,8 @@ exports.submitReceipt = functions.https.onRequest(async (req, res) => {
     try {
         const qSnapshot = await uniqueTxnRef.where('txnId', '==', txnId.trim()).get();
         if (!qSnapshot.empty) {
-            return res.status(409).json({ message: `Error: The Transaction ID ${txnId} has already been submitted.` });
+            // FIXED: object-curly-spacing
+            return res.status(409).json({message:`Error: The Transaction ID ${txnId} has already been submitted.`});
         }
     } catch (error) {
         functions.logger.error('Firestore UTR Check Error:', error);
@@ -79,27 +84,28 @@ exports.submitReceipt = functions.https.onRequest(async (req, res) => {
     try {
         const adminCollectionRef = db.collection(`artifacts/${APP_ID}/public/data/receipts_for_review`);
         await adminCollectionRef.add(receiptData);
-        functions.logger.info('Receipt saved to Firestore successfully.', { txnId, email });
+        functions.logger.info('Receipt saved to Firestore successfully.', {txnId, email});
     } catch (error) {
         functions.logger.error('Firestore Save Error:', error);
-        return res.status(500).json({ message: 'Database error occurred. Receipt not saved.' });
+        // FIXED: object-curly-spacing
+        return res.status(500).json({message:'Database error occurred. Receipt not saved.'});
     }
 
     // 5. Save UTR to the unique list
     try {
-        await uniqueTxnRef.add({ txnId: txnId.trim(), timestamp: admin.firestore.FieldValue.serverTimestamp() });
+        await uniqueTxnRef.add({txnId: txnId.trim(), timestamp: admin.firestore.FieldValue.serverTimestamp()});
     } catch (error) {
         functions.logger.error('Failed to save UTR to unique list:', error);
     }
 
     // 6. Send Confirmation Email via SendGrid
     if (!sendGridKey) {
-        return res.status(200).json({ message: 'Submission successful, but email skipped due to missing API key.' });
+        // FIXED: object-curly-spacing
+        return res.status(200).json({message:'Submission successful, but email skipped due to missing API key.'});
     }
 
-    // Email content (same as before for simplicity)
+    // Email content (using your verified Single Sender email)
     const msg = {
-        // *** FIX: Changed to use your verified Single Sender email ***
         to: email,
         from: 'nitinxai.ml@gmail.com', 
         subject: `Pragyan AI Contribution Received - Txn ID ${txnId}`,
@@ -108,9 +114,11 @@ exports.submitReceipt = functions.https.onRequest(async (req, res) => {
 
     try {
         await sgMail.send(msg);
-        return res.status(200).json({ message: 'Submission successful! Your receipt will be emailed after verification.' });
+        // FIXED: object-curly-spacing
+        return res.status(200).json({message:'Submission successful! Your receipt will be emailed after verification.'});
     } catch (error) {
         functions.logger.error('SendGrid Email Error:', error.response?.body || error);
-        return res.status(200).json({ message: 'Submission successful, but email failed to send. We saved your details and will contact you.' });
+        // FIXED: object-curly-spacing
+        return res.status(200).json({message:'Submission successful, but email failed to send. We saved your details and will contact you.'});
     }
 });
