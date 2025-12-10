@@ -3,8 +3,9 @@
  * This function saves the receipt to Firestore and sends a confirmation email via SendGrid.
  */
 
-// Import Firebase Functions and Admin SDK
-const functions = require('firebase-functions');
+// Import only the necessary modules from firebase-functions and admin to satisfy the linter
+// Note: We are using destructuring for functions (https, logger)
+const { https, logger } = require('firebase-functions');
 const admin = require('firebase-admin');
 
 // Initialize Firebase Admin SDK
@@ -15,9 +16,9 @@ const db = admin.firestore();
 const sgMail = require('@sendgrid/mail');
 
 // Set the SendGrid API Key from the Firebase environment configuration
-const sendGridKey = functions.config().sendgrid?.key;
+const sendGridKey = https.config().sendgrid?.key;
 if (!sendGridKey) {
-    functions.logger.error("SendGrid API key not configured. Email sending will fail.");
+    logger.error("SendGrid API key not configured. Email sending will fail.");
 } else {
     sgMail.setApiKey(sendGridKey);
 }
@@ -28,7 +29,7 @@ const APP_ID = 'pragyanalpha';
 /**
  * HTTPS Callable Function to handle receipt submission.
  */
-exports.submitReceipt = functions.https.onRequest(async (req, res) => {
+exports.submitReceipt = https.onRequest(async (req, res) => {
     // 1. CORS Setup (Essential for GitHub Pages/External Hosting)
     res.set('Access-Control-Allow-Origin', '*');
     res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -67,7 +68,7 @@ exports.submitReceipt = functions.https.onRequest(async (req, res) => {
             return res.status(409).json({message:`Error: The Transaction ID ${txnId} has already been submitted.`});
         }
     } catch (error) {
-        functions.logger.error('Firestore UTR Check Error:', error);
+        logger.error('Firestore UTR Check Error:', error);
     }
 
     // 4. Save Receipt to Firestore
@@ -83,9 +84,9 @@ exports.submitReceipt = functions.https.onRequest(async (req, res) => {
     try {
         const adminCollectionRef = db.collection(`artifacts/${APP_ID}/public/data/receipts_for_review`);
         await adminCollectionRef.add(receiptData);
-        functions.logger.info('Receipt saved to Firestore successfully.', {txnId, email});
+        logger.info('Receipt saved to Firestore successfully.', {txnId, email});
     } catch (error) {
-        functions.logger.error('Firestore Save Error:', error);
+        logger.error('Firestore Save Error:', error);
         // Corrected spacing: {message:'...'}
         return res.status(500).json({message:'Database error occurred. Receipt not saved.'});
     }
@@ -94,7 +95,7 @@ exports.submitReceipt = functions.https.onRequest(async (req, res) => {
     try {
         await uniqueTxnRef.add({txnId: txnId.trim(), timestamp: admin.firestore.FieldValue.serverTimestamp()});
     } catch (error) {
-        functions.logger.error('Failed to save UTR to unique list:', error);
+        logger.error('Failed to save UTR to unique list:', error);
     }
 
     // 6. Send Confirmation Email via SendGrid
@@ -106,9 +107,9 @@ exports.submitReceipt = functions.https.onRequest(async (req, res) => {
     // Email content (using your verified Single Sender email)
     const msg = {
         to: email,
-        from: 'nitinxai.ml@gmail.com', 
+        from: 'nitinxaiml.pragyanai@gmail.com', 
         subject: `Pragyan AI Contribution Received - Txn ID ${txnId}`,
-        html: `<p>Thank you for your generous contribution of <strong>₹${parsedAmount.toFixed(2)}</strong> to the Pragyan AI open-source project. Your details are being verified.</p>`,
+        html: `<p>Thank political. your generous contribution of <strong>₹${parsedAmount.toFixed(2)}</strong> to the Pragyan AI open-source project. Your details are being verified.</p>`,
     };
 
     try {
@@ -116,7 +117,7 @@ exports.submitReceipt = functions.https.onRequest(async (req, res) => {
         // Corrected spacing: {message:'...'}
         return res.status(200).json({message:'Submission successful! Your receipt will be emailed after verification.'});
     } catch (error) {
-        functions.logger.error('SendGrid Email Error:', error.response?.body || error);
+        logger.error('SendGrid Email Error:', error.response?.body || error);
         // Corrected spacing: {message:'...'}
         return res.status(200).json({message:'Submission successful, but email failed to send. We saved your details and will contact you.'});
     }
