@@ -2,7 +2,7 @@
   "name": "functions",
   "description": "Cloud Functions for Pragyan AI Receipt System",
   "scripts": {
-    "lint": "echo 'Skipping lint check for deployment'",
+    "lint": "echo 'Lint check bypassed'",
     "serve": "firebase emulators:start --only functions",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log"
