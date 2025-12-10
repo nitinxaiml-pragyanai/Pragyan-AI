@@ -15,6 +15,7 @@ const db = admin.firestore();
 const sgMail = require('@sendgrid/mail');
 
 // Set the SendGrid API Key from the Firebase environment configuration
+// We only import what we need (functions, admin, sgMail).
 const sendGridKey = functions.config().sendgrid?.key;
 if (!sendGridKey) {
     functions.logger.error("SendGrid API key not configured. Email sending will fail.");
@@ -27,7 +28,6 @@ const APP_ID = 'pragyanalpha';
 
 /**
  * HTTPS Callable Function to handle receipt submission.
- * We are using functions.https.onRequest, not functions.https.onCall.
  */
 exports.submitReceipt = functions.https.onRequest(async (req, res) => {
     // 1. CORS Setup (Essential for GitHub Pages/External Hosting)
@@ -41,7 +41,7 @@ exports.submitReceipt = functions.https.onRequest(async (req, res) => {
     }
 
     if (req.method !== 'POST') {
-        // FIXED: object-curly-spacing (no space after { and before })
+        // Corrected spacing: {message:'...'}
         return res.status(405).send({message:'Method Not Allowed. Use POST.'});
     }
 
@@ -49,13 +49,13 @@ exports.submitReceipt = functions.https.onRequest(async (req, res) => {
     const {name, email, amount, txnId} = req.body;
 
     if (!name || !email || !amount || !txnId) {
-        // FIXED: object-curly-spacing
+        // Corrected spacing: {message:'...'}
         return res.status(400).json({message:'Missing required fields: name, email, amount, or UTR/Transaction ID.'});
     }
 
     const parsedAmount = parseFloat(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
-        // FIXED: object-curly-spacing
+        // Corrected spacing: {message:'...'}
         return res.status(400).json({message:'Invalid contribution amount.'});
     }
 
@@ -64,7 +64,7 @@ exports.submitReceipt = functions.https.onRequest(async (req, res) => {
     try {
         const qSnapshot = await uniqueTxnRef.where('txnId', '==', txnId.trim()).get();
         if (!qSnapshot.empty) {
-            // FIXED: object-curly-spacing
+            // Corrected spacing: {message:'...'}
             return res.status(409).json({message:`Error: The Transaction ID ${txnId} has already been submitted.`});
         }
     } catch (error) {
@@ -87,7 +87,7 @@ exports.submitReceipt = functions.https.onRequest(async (req, res) => {
         functions.logger.info('Receipt saved to Firestore successfully.', {txnId, email});
     } catch (error) {
         functions.logger.error('Firestore Save Error:', error);
-        // FIXED: object-curly-spacing
+        // Corrected spacing: {message:'...'}
         return res.status(500).json({message:'Database error occurred. Receipt not saved.'});
     }
 
@@ -100,25 +100,25 @@ exports.submitReceipt = functions.https.onRequest(async (req, res) => {
 
     // 6. Send Confirmation Email via SendGrid
     if (!sendGridKey) {
-        // FIXED: object-curly-spacing
+        // Corrected spacing: {message:'...'}
         return res.status(200).json({message:'Submission successful, but email skipped due to missing API key.'});
     }
 
     // Email content (using your verified Single Sender email)
     const msg = {
         to: email,
-        from: 'nitinxai.ml@gmail.com', 
+        from: 'nitinxaiml.pragyanai@gmail.com', 
         subject: `Pragyan AI Contribution Received - Txn ID ${txnId}`,
         html: `<p>Thank you for your generous contribution of <strong>₹${parsedAmount.toFixed(2)}</strong> to the Pragyan AI open-source project. Your details are being verified.</p>`,
     };
 
     try {
         await sgMail.send(msg);
-        // FIXED: object-curly-spacing
+        // Corrected spacing: {message:'...'}
         return res.status(200).json({message:'Submission successful! Your receipt will be emailed after verification.'});
     } catch (error) {
         functions.logger.error('SendGrid Email Error:', error.response?.body || error);
-        // FIXED: object-curly-spacing
+        // Corrected spacing: {message:'...'}
         return res.status(200).json({message:'Submission successful, but email failed to send. We saved your details and will contact you.'});
     }
 });
