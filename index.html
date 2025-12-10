@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pragyan by Nitin Raj | India's Open Source AI</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Space+Grotesk:wght=500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Animate On Scroll (AOS) -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        samrion: {
+                            red: '#E11D48', 
+                            dark: '#881337',
+                        },
+                        pragyan: {
+                            blue: '#0EA5E9', 
+                            glow: '#38BDF8',
+                            dark: '#0284C7'
+                        },
+                        bg: {
+                            main: '#0F172A',
+                            card: '#1E293B'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .glass-nav {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .hero-glow {
+            background: radial-gradient(circle at center, rgba(14, 165, 233, 0.15) 0%, rgba(15, 23, 42, 0) 70%);
+        }
+
+        .text-gradient {
+            background: linear-gradient(to right, #38BDF8, #818CF8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .timeline-line::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #334155;
+            z-index: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .timeline-line::before {
+                left: 20px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-bg-main text-slate-200 antialiased overflow-x-hidden">
+
+    <!-- Navigation -->
+    <nav class="glass-nav fixed w-full z-50 transition-all duration-300">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            
+            <!-- Samrion Brand Identity (Logo + Nitin Raj Name) - Uses Inline SVG -->
+            <div class="flex items-center space-x-3 group cursor-pointer">
+                <!-- Samrion S Logo (Inline SVG) -->
+                <div class="h-10 w-10 bg-samrion-red rounded-lg flex items-center justify-center shadow-lg shadow-red-900/50 transition duration-300 group-hover:scale-105">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16.5 12.75a4.5 4.5 0 11-9 0m9 0H3m14.5 0H21m-2.5 0a4.5 4.5 0 00-9 0" />
+                    </svg>
+                </div>
+                <div class="hidden md:block">
+                    <span class="text-xs uppercase tracking-widest text-slate-400">Project by</span>
+                    <h2 class="font-bold text-lg leading-none text-white">Nitin Raj <span class="text-samrion-red text-xs">(Samrion)</span></h2>
+                </div>
+            </div>
+
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex space-x-8 text-sm font-semibold tracking-wide">
+                <a href="#mission" class="hover:text-pragyan-blue transition">Mission</a>
+                <a href="#roadmap" class="hover:text-pragyan-blue transition">Roadmap</a>
+                <a href="./contribution.html" class="text-pragyan-blue hover:text-white transition">Support Us</a>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button class="md:hidden text-2xl text-white" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-bg-card border-b border-slate-700">
+            <div class="flex flex-col p-4 space-y-4 text-center">
+                <a href="#mission" class="block hover:text-pragyan-blue">Mission</a>
+                <a href="#roadmap" class="block hover:text-pragyan-blue">Roadmap</a>
+                <a href="./contribution.html" class="block text-samrion-red font-bold">Donate Now</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-6 overflow-hidden">
+        <div class="hero-glow absolute inset-0 z-0 pointer-events-none"></div>
+        
+        <div class="container mx-auto text-center relative z-10" data-aos="fade-up">
+            <!-- Project Logo (Pragyan Image) - LOGO PLACEMENT: Add your actual logo path/URL here -->
+            <div class="mx-auto mb-8 h-24 w-24 md:h-32 md:w-32 rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(14,165,233,0.3)] rotate-3 hover:rotate-0 transition-all duration-500">
+                <img src="https://placehold.co/128x128/0EA5E9/ffffff?text=P+AI" alt="Pragyan AI Logo" class="w-full h-full object-cover">
+            </div>
+
+            <h1 class="text-5xl md:text-7xl font-display font-bold mb-4 tracking-tight">
+                Pragyan <span class="text-pragyan-blue">AI</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-400 mb-8 max-w-2xl mx-auto">
+                Building India’s First Community-Driven<br> Open Source AI Model.
+            </p>
+            
+            <div class="flex flex-col md:flex-row justify-center items-center gap-4">
+                <!-- Contribution Button -->
+                <a href="./contribution.html" class="px-8 py-4 bg-samrion-red hover:bg-red-700 text-white rounded-full font-bold text-lg transition-all transform hover:scale-105 shadow-lg shadow-red-900/50 flex items-center gap-2">
+                    <i class="fa-solid fa-heart"></i> Contribute Now (UPI)
+                </a>
+                
+                <!-- NEW: Talk to Pragyan Button -->
+                <a href="https://huggingface.co/spaces/PragyanXNitinAI/Pragyan.ai" target="_blank" rel="noopener noreferrer" class="px-8 py-4 bg-pragyan-blue hover:bg-pragyan-dark text-slate-900 rounded-full font-bold text-lg transition-all transform hover:scale-105 shadow-lg shadow-pragyan-blue/50 flex items-center gap-2">
+                    <i class="fa-solid fa-robot"></i> Talk to Pragyan
+                </a>
+
+                <!-- View Source Code -->
+                <a href="https://github.com/nitinxaiml-pragyanai/Pragyan-AI" target="_blank" class="px-8 py-4 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white rounded-full font-bold text-lg transition-all flex items-center gap-2">
+                    <i class="fa-brands fa-github"></i> View Source Code
+                </a>
+            </div>
+
+            <div class="mt-12 flex justify-center items-center gap-8 text-slate-500 text-sm font-mono">
+                <span><i class="fa-solid fa-check text-green-500 mr-2"></i>Open Source</span>
+                <span><i class="fa-solid fa-check text-green-500 mr-2"></i>Indigenous</span>
+                <span><i class="fa-solid fa-check text-green-500 mr-2"></i>Transparent</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Why This Matters Section -->
+    <section id="mission" class="py-20 bg-bg-card border-y border-slate-800">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div data-aos="fade-right">
+                    <h2 class="text-3xl md:text-4xl font-display font-bold mb-6">Why <span class="text-gradient">Pragyan</span> Matters?</h2>
+                    <p class="text-slate-300 leading-relaxed mb-4 text-lg">
+                        India currently depends on foreign AI systems like GPT, Claude, and Gemini. If we don’t build our own, we will depend on foreign companies, foreign data policies, and foreign control.
+                    </p>
+                    <p class="text-slate-300 leading-relaxed mb-6 text-lg">
+                        I am an independent developer building a fully open-source model pipeline to ensure India becomes self-reliant in AI.
+                    </p>
+                    <div class="bg-bg-main p-6 rounded-xl border border-slate-700">
+                        <h3 class="font-bold text-white mb-2"><i class="fa-solid fa-user text-pragyan-blue mr-2"></i> Who Am I?</h3>
+                        <p class="text-sm text-slate-400">
+                            "My name is <span class="text-white font-semibold">Nitin Raj</span>. I have no big company behind me. No sponsors. Just a laptop, a dream, and the support of people like you."
+                        </p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4" data-aos="fade-left">
+                    <div class="bg-bg-main p-6 rounded-2xl border border-slate-700 hover:border-pragyan-blue transition-colors text-center">
+                        <i class="fa-solid fa-database text-3xl text-pragyan-blue mb-3"></i>
+                        <h4 class="font-bold">Data Sovereignty</h4>
+                    </div>
+                    <div class="bg-bg-main p-6 rounded-2xl border border-slate-700 hover:border-pragyan-blue transition-colors text-center">
+                        <i class="fa-solid fa-language text-3xl text-pragyan-blue mb-3"></i>
+                        <h4 class="font-bold">Indian Languages</h4>
+                    </div>
+                    <div class="bg-bg-main p-6 rounded-2xl border border-slate-700 hover:border-pragyan-blue transition-colors text-center">
+                        <i class="fa-solid fa-code text-3xl text-pragyan-blue mb-3"></i>
+                        <h4 class="font-bold">Open Source</h4>
+                    </div>
+                    <div class="bg-bg-main p-6 rounded-2xl border border-slate-700 hover:border-pragyan-blue transition-colors text-center">
+                        <i class="fa-solid fa-shield-halved text-3xl text-pragyan-blue mb-3"></i>
+                        <h4 class="font-bold">Transparency</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Roadmap (Timeline) -->
+    <section id="roadmap" class="py-20 relative">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-display font-bold">The Journey to <span class="text-gradient">Ultra</span></h2>
+                <p class="text-slate-400 mt-4">We are climbing the ladder of intelligence, one model at a time.</p>
+            </div>
+
+            <div class="relative timeline-line max-w-3xl mx-auto">
+                <!-- Step 1: DONE -->
+                <div class="relative flex md:justify-center items-center mb-12 pl-12 md:pl-0" data-aos="zoom-in">
+                    <div class="absolute left-0 md:left-1/2 transform md:-translate-x-1/2 w-8 h-8 bg-green-500 rounded-full border-4 border-bg-main z-10 flex items-center justify-center">
+                        <i class="fa-solid fa-check text-bg-main text-xs"></i>
+                    </div>
+                    <div class="bg-bg-card p-6 rounded-xl border border-green-500/50 shadow-lg w-full md:w-5/12 ml-auto md:ml-0 md:mr-auto">
+                        <h3 class="font-bold text-green-400 text-lg">1. Nano Model (1–10M)</h3>
+                        <p class="text-sm text-slate-400 mt-1">Foundation built. Proof of concept operational.</p>
+                        <span class="inline-block mt-2 px-2 py-1 bg-green-900/30 text-green-400 text-xs rounded border border-green-800">Completed</span>
+                    </div>
+                </div>
+
+                <!-- Step 2: NEXT -->
+                <div class="relative flex md:justify-center items-center mb-12 pl-12 md:pl-0" data-aos="zoom-in">
+                    <div class="absolute left-0 md:left-1/2 transform md:-translate-x-1/2 w-8 h-8 bg-pragyan-blue rounded-full border-4 border-bg-main z-10 shadow-[0_0_15px_#0EA5E9]"></div>
+                    <div class="bg-gradient-to-r from-bg-card to-slate-800 p-6 rounded-xl border border-pragyan-blue shadow-lg w-full md:w-5/12 mr-auto md:mr-0 md:ml-auto text-right md:text-left">
+                        <h3 class="font-bold text-white text-xl">2. Mini Model</h3>
+                        <p class="text-sm text-slate-300 mt-1">Requiring GPU compute. The next big milestone.</p>
+                        <span class="inline-block mt-2 px-2 py-1 bg-pragyan-blue text-black font-bold text-xs rounded animate-pulse">Current Goal</span>
+                    </div>
+                </div>
+
+                <!-- Step 3: FUTURE -->
+                <div class="relative flex md:justify-center items-center pl-12 md:pl-0" data-aos="fade-up">
+                    <div class="absolute left-0 md:left-1/2 transform md:-translate-x-1/2 w-8 h-8 bg-slate-700 rounded-full border-4 border-bg-main z-10"></div>
+                    <div class="bg-bg-card p-6 rounded-xl border border-slate-700 w-full md:w-5/12 ml-auto md:ml-0 md:mr-auto opacity-70">
+                        <h3 class="font-bold text-slate-300 text-lg">3. Base Model & Beyond</h3>
+                        <p class="text-sm text-slate-500 mt-1">The path to India's GPT-Class Intelligence.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Contribution Callout -->
+    <section id="contribute" class="py-16 bg-bg-card border-y border-slate-800">
+        <div class="container mx-auto px-6 text-center" data-aos="fade-up">
+            <h2 class="text-3xl font-display font-bold mb-4">Support the Mission</h2>
+            <p class="text-xl text-slate-400 mb-6">
+                Your contribution directly funds the GPU compute needed for the Mini-Model.
+            </p>
+            <a href="./contribution.html" class="inline-flex items-center gap-3 px-10 py-4 bg-pragyan-blue hover:bg-blue-500 text-slate-900 rounded-full font-bold text-lg transition-all transform hover:scale-105 shadow-lg shadow-pragyan-blue/40">
+                <i class="fa-solid fa-hand-holding-heart"></i> See Contribution Tiers
+            </a>
+        </div>
+    </section>
+
+
+    <!-- Footer -->
+    <footer class="bg-bg-main py-12 border-t border-slate-900">
+        <div class="container mx-auto px-6 text-center">
+            
+            <p class="text-xl font-display font-bold text-white mb-6">
+                "Let’s build India’s AI future — together."
+            </p>
+
+            <p class="text-slate-600 text-sm">
+                Project Pragyan by Nitin Raj. Open Source.<br>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Init AOS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 800,
+            once: true,
+        });
+    </script>
+</body>
+</html>
+
