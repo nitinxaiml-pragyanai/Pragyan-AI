@@ -1,123 +1,141 @@
 /**
- * Firebase Cloud Function to send email receipts via SendGrid, ONLY after
- * an Admin manually verifies and marks the transaction as 'Confirmed'.
- *
- * SENDER EMAIL: nitinxaiml@gmail.com (MUST be verified in SendGrid)
- * Trigger: Firestore onUpdate when status changes to 'Confirmed'.
+ * Firebase Cloud Function for handling contribution submissions.
+ * This function saves the receipt to Firestore and sends a confirmation email via SendGrid.
  */
 
+// Import Firebase Functions and Admin SDK
 const functions = require('firebase-functions');
+const admin = require('firebase-admin');
+
+// Initialize Firebase Admin SDK
+// This allows the function to interact with Firestore and other Firebase services
+admin.initializeApp();
+const db = admin.firestore();
+
+// Import SendGrid
 const sgMail = require('@sendgrid/mail');
 
-// WARNING: Placing keys directly in code is generally insecure.
-// This is done based on the user's explicit instruction that the repository is private.
-const SENDGRID_API_KEY = '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'; 
-sgMail.setApiKey(SENDGRID_API_KEY);
+// Set the SendGrid API Key from the Firebase environment configuration
+// The key is accessed via functions.config().sendgrid.key
+const sendGridKey = functions.config().sendgrid?.key;
+if (!sendGridKey) {
+    functions.logger.error("SendGrid API key not configured. Deployment will fail to send emails.");
+} else {
+    sgMail.setApiKey(sendGridKey);
+}
 
-// Use the exact verified sender email address
-const SENDER_EMAIL = 'nitinxaiml@gmail.com'; 
 
-exports.sendVerifiedReceiptEmail = functions.firestore
-    .document('artifacts/{appId}/users/{userId}/receipts/{receiptId}')
-    .onUpdate(async (change, context) => {
-        
-        const beforeData = change.before.data();
-        const afterData = change.after.data();
+/**
+ * HTTPS Callable Function to handle receipt submission.
+ * This is the public endpoint called by the contribution.html page.
+ */
+exports.submitReceipt = functions.https.onRequest(async (req, res) => {
+    // 1. CORS Setup (Essential for GitHub Pages to talk to Cloud Functions)
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
 
-        // 1. Check if the status has changed TO 'Confirmed'
-        const statusBefore = beforeData.status;
-        const statusAfter = afterData.status;
+    if (req.method === 'OPTIONS') {
+        // Stop preflight requests here
+        res.status(204).send('');
+        return;
+    }
 
-        if (statusAfter !== 'Confirmed' || statusBefore === 'Confirmed') {
-            functions.logger.info(`Status change not from Pending to Confirmed, or status unchanged. Aborting.`);
-            return null;
+    if (req.method !== 'POST') {
+        return res.status(405).send({ message: 'Method Not Allowed. Use POST.' });
+    }
+
+    // 2. Input Validation
+    const { name, email, amount, txnId } = req.body;
+
+    if (!name || !email || !amount || !txnId) {
+        functions.logger.warn('Missing fields in request:', req.body);
+        return res.status(400).json({ message: 'Missing required fields: name, email, amount, or UTR/Transaction ID (txnId).' });
+    }
+
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+        return res.status(400).json({ message: 'Invalid contribution amount.' });
+    }
+
+    // Use a fixed App ID and User ID for the Firestore path (since this is a simple receipt system)
+    const appId = 'pragyan-ai-receipt-system'; 
+
+    // 3. UTR Duplicate Check (Public collection for global uniqueness)
+    const uniqueTxnRef = db.collection(`artifacts/${appId}/public/data/all_receipts`);
+    try {
+        const qSnapshot = await uniqueTxnRef.where('txnId', '==', txnId.trim()).get();
+        if (!qSnapshot.empty) {
+            functions.logger.warn(`Duplicate UTR submission detected: ${txnId}`);
+            return res.status(409).json({ message: `Error: The Transaction ID ${txnId} has already been submitted. Please double-check the ID.` });
         }
+    } catch (error) {
+        functions.logger.error('Firestore UTR Check Error:', error);
+        // Continue submission, but log the error (don't stop process on check failure)
+    }
 
-        // --- Verification Complete: Send Email ---
-        
-        if (!afterData.email || !afterData.name || !afterData.amount || !afterData.txnId) {
-            functions.logger.error("Missing essential data after confirmation. Aborting email send.", afterData);
-            return null;
-        }
+    // 4. Save Receipt to Firestore
+    const receiptData = {
+        name: name,
+        email: email,
+        amount: parsedAmount.toFixed(2),
+        txnId: txnId.trim(),
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        status: 'Pending Verification', // Initial status
+    };
 
-        const receiptData = afterData; // Use the confirmed data
+    try {
+        // Save to the admin-review collection
+        const adminCollectionRef = db.collection(`artifacts/${appId}/public/data/receipts_for_review`);
+        await adminCollectionRef.add(receiptData);
+        functions.logger.info('Receipt saved to Firestore successfully.', { txnId, email });
+    } catch (error) {
+        functions.logger.error('Firestore Save Error:', error);
+        return res.status(500).json({ message: 'Database error occurred. Receipt not saved.' });
+    }
 
-        const msg = {
-            to: receiptData.email,
-            from: SENDER_EMAIL,
-            subject: '✅ Receipt Confirmed: Thank You for Your Contribution to Pragyan AI!',
-            text: `Dear ${receiptData.name}, your contribution of ₹${receiptData.amount} (Txn ID: ${receiptData.txnId}) has been manually verified and confirmed. Your support fuels India's open-source AI future!`,
-            html: `
-                <div style="font-family: 'Outfit', Arial, sans-serif; background-color: #f4f7fa; padding: 20px;">
-                    <div style="max-width: 600px; margin: auto; background: #ffffff; padding: 0; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-                        
-                        <!-- Header Block -->
-                        <table role="presentation" width="100%" style="border-collapse: collapse;">
-                            <tr>
-                                <td style="background-color: #0F172A; padding: 30px; border-radius: 8px 8px 0 0; text-align: center; border-top: 5px solid #0EA5E9;">
-                                    
-                                    <!-- LOGO PLACEMENT: Place your Company/Project Logo URL here -->
-                                    <img src="https://placehold.co/40x40/E11D48/ffffff?text=LOGO" alt="Company Logo" style="height: 40px; margin-bottom: 10px; border-radius: 4px;">
+    // 5. Save UTR to the unique list (after successful receipt save)
+    try {
+        await uniqueTxnRef.add({ txnId: txnId.trim(), timestamp: admin.firestore.FieldValue.serverTimestamp() });
+    } catch (error) {
+        functions.logger.error('Failed to save UTR to unique list:', error);
+        // Non-critical, but logged.
+    }
 
-                                    <h1 style="color: #0EA5E9; margin: 0; font-size: 28px; font-weight: 700;">Pragyan AI</h1>
-                                    <p style="color: #94a3b8; font-size: 14px; margin: 5px 0 0 0;">India's Open Source AI Mission</p>
-                                </td>
-                            </tr>
-                        </table>
 
-                        <!-- Content Block -->
-                        <div style="padding: 30px;">
-                            <p style="font-size: 18px; color: #1E293B; font-weight: 700; margin-top: 0;">✅ Receipt Confirmed</p>
-                            
-                            <p style="font-size: 16px; color: #475569; line-height: 1.5;">
-                                Dear <strong style="color: #0EA5E9;">${receiptData.name}</strong>,
-                            </p>
-                            <p style="font-size: 16px; color: #475569; line-height: 1.5;">
-                                Your generous contribution has been manually verified and confirmed by our team. Thank you for making an impact on indigenous open-source AI in India!
-                            </p>
+    // 6. Send Confirmation Email via SendGrid
+    if (!sendGridKey) {
+        functions.logger.warn("SendGrid key is missing, skipping email.");
+        return res.status(200).json({ message: 'Submission successful, but email skipped due to missing API key.' });
+    }
 
-                            <table role="presentation" width="100%" style="border-collapse: collapse; margin: 20px 0; font-size: 15px;">
-                                <tr>
-                                    <td style="padding: 12px 0; border-bottom: 1px solid #eeeeee; color: #334155; font-weight: 400;">Expected & Verified Amount:</td>
-                                    <td style="padding: 12px 0; border-bottom: 1px solid #eeeeee; text-align: right; font-weight: 700; color: #E11D48; font-size: 20px;">
-                                        ₹${receiptData.amount}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 12px 0; border-bottom: 1px solid #eeeeee; color: #334155; font-weight: 400;">Transaction ID (UTR):</td>
-                                    <td style="padding: 12px 0; border-bottom: 1px solid #eeeeee; text-align: right; font-weight: 500;">
-                                        ${receiptData.txnId}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 12px 0; color: #334155; font-weight: 400;">Email Address:</td>
-                                    <td style="padding: 12px 0; text-align: right; font-weight: 500;">
-                                        ${receiptData.email}
-                                    </td>
-                                </tr>
-                            </table>
+    const emailTemplate = `
+        <p style="font-family: Arial, sans-serif; color: #333;">Dear ${name},</p>
+        <p style="font-family: Arial, sans-serif; color: #333;">Thank you for your generous contribution of <strong>₹${parsedAmount.toFixed(2)}</strong> to the Pragyan AI open-source project.</p>
+        <p style="font-family: Arial, sans-serif; color: #333;">We have received your receipt submission details:</p>
+        <ul style="font-family: Arial, sans-serif; color: #333; list-style-type: none; padding-left: 0;">
+            <li><strong>Amount:</strong> ₹${parsedAmount.toFixed(2)}</li>
+            <li><strong>Transaction ID (UTR):</strong> ${txnId}</li>
+            <li><strong>Submission Time:</strong> ${new Date().toLocaleString()}</li>
+        </ul>
+        <p style="font-family: Arial, sans-serif; color: #d9534f; font-weight: bold;">Your contribution is currently being verified. We will send a final, confirmed receipt to this email address within 24-48 hours.</p>
+        <p style="font-family: Arial, sans-serif; color: #5cb85c; margin-top: 20px;">Your support directly fuels our mission to build India's next-generation open-source AI model.</p>
+        <p style="font-family: Arial, sans-serif; color: #333;">Best regards,<br>The Pragyan AI Team</p>
+    `;
 
-                            <p style="text-align: center; margin-top: 35px;">
-                                <a href="https://your-domain.com/receipt/download?txn=${receiptData.txnId}&amount=${receiptData.amount}" style="display: inline-block; padding: 12px 25px; background-color: #E11D48; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; border: 1px solid #E11D48;">
-                                    View Contribution Details
-                                </a>
-                            </p>
-                            
-                            <p style="text-align: center; margin-top: 30px; font-size: 14px; color: #64748B;">
-                                Project by Nitin Raj. Thank you for your support!
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            `,
-        };
+    const msg = {
+        to: email,
+        from: 'no-reply@pragyan-ai.org', // Use a verified sender email in SendGrid
+        subject: `Pragyan AI Contribution Received - Txn ID ${txnId}`,
+        html: emailTemplate,
+    };
 
-        try {
-            await sgMail.send(msg);
-            functions.logger.log('Verified receipt email successfully sent to', afterData.email);
-        } catch (error) {
-            functions.logger.error('Error sending verified receipt email:', error.response ? error.response.body : error);
-        }
-
-        return null;
-    });
+    try {
+        await sgMail.send(msg);
+        functions.logger.info(`Confirmation email sent to ${email}.`);
+        return res.status(200).json({ message: 'Submission successful! Your confirmed receipt will be emailed after verification.' });
+    } catch (error) {
+        functions.logger.error('SendGrid Email Error:', error.response?.body || error);
+        return res.status(200).json({ message: 'Submission successful, but email failed to send. We saved your details and will contact you.' });
+    }
+});
