@@ -15,7 +15,6 @@ const db = admin.firestore();
 const sgMail = require('@sendgrid/mail');
 
 // Set the SendGrid API Key from the Firebase environment configuration
-// We only import what we need (functions, admin, sgMail).
 const sendGridKey = functions.config().sendgrid?.key;
 if (!sendGridKey) {
     functions.logger.error("SendGrid API key not configured. Email sending will fail.");
@@ -107,7 +106,7 @@ exports.submitReceipt = functions.https.onRequest(async (req, res) => {
     // Email content (using your verified Single Sender email)
     const msg = {
         to: email,
-        from: 'nitinxaiml.pragyanai@gmail.com', 
+        from: 'nitinxai.ml@gmail.com', 
         subject: `Pragyan AI Contribution Received - Txn ID ${txnId}`,
         html: `<p>Thank you for your generous contribution of <strong>₹${parsedAmount.toFixed(2)}</strong> to the Pragyan AI open-source project. Your details are being verified.</p>`,
     };
