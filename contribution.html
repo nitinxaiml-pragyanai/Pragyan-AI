@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contribute to Pragyan AI | Fueling India's Open Source AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        samrion: { red: '#E11D48' },
+                        pragyan: { blue: '#0EA5E9', dark: '#0284C7' },
+                        bg: { main: '#0F172A', card: '#1E293B', panel: '#29374B' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Outfit', sans-serif; }
+        .tier-card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .tier-card.selected {
+            border-color: #0EA5E9;
+            background-color: #0EA5E91A; /* Light blue tint */
+            box-shadow: 0 0 20px rgba(14, 165, 233, 0.7);
+            transform: translateY(-4px) scale(1.03);
+        }
+    </style>
+</head>
+<body class="bg-bg-main text-slate-200 antialiased min-h-screen pb-12">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-10 bg-bg-card shadow-lg border-b border-slate-700/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
+            <a href="./index.html" class="text-2xl font-display font-bold text-pragyan-blue">Pragyan AI</a>
+            <a href="./index.html" class="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-slate-700 hover:text-white transition">
+                <i class="fa-solid fa-house mr-1"></i> Home
+            </a>
+        </div>
+    </nav>
+    
+    <div class="max-w-xl mx-auto p-4 sm:p-8">
+        <div class="p-6 bg-bg-card rounded-2xl shadow-2xl border-t-8 border-pragyan-blue text-slate-200">
+            
+            <header class="text-center mb-8">
+                <h2 class="text-3xl sm:text-4xl font-display font-bold text-white mb-2">Fuel the Pragyan Mini-Model</h2>
+                <p class="text-slate-400">Your contribution powers the GPU compute needed for the next phase.</p>
+            </header>
+
+            <!-- Step 1: Choose Contribution Amount -->
+            <div class="mb-10 p-5 bg-bg-panel rounded-xl border border-slate-700">
+                <h3 class="text-xl font-bold text-pragyan-blue mb-4 flex items-center">
+                    <span class="bg-pragyan-blue text-white w-6 h-6 flex items-center justify-center rounded-full mr-3 text-sm font-bold">1</span> 
+                    Choose Contribution Amount
+                </h3>
+                
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                    <div data-amount="101" class="tier-card p-4 bg-slate-800 rounded-xl border-2 border-slate-700 transition duration-300 cursor-pointer hover:border-pragyan-blue/50 text-center">
+                        <p class="text-xl font-bold text-pragyan-blue">₹101</p>
+                        <p class="text-xs text-slate-400 mt-1">The Spark</p>
+                    </div>
+                    <div data-amount="501" class="tier-card p-4 bg-slate-800 rounded-xl border-2 border-slate-700 transition duration-300 cursor-pointer hover:border-pragyan-blue/50 text-center">
+                        <p class="text-xl font-bold text-pragyan-blue">₹501</p>
+                        <p class="text-xs text-slate-400 mt-1">The Builder</p>
+                    </div>
+                    <div data-amount="1001" class="tier-card p-4 bg-slate-800 rounded-xl border-2 border-slate-700 transition duration-300 cursor-pointer hover:border-pragyan-blue/50 text-center">
+                        <p class="text-xl font-bold text-pragyan-blue">₹1001</p>
+                        <p class="text-xs text-slate-400 mt-1">The Patron</p>
+                    </div>
+                    <div data-amount="2001" class="tier-card p-4 bg-slate-800 rounded-xl border-2 border-slate-700 transition duration-300 cursor-pointer hover:border-pragyan-blue/50 text-center">
+                        <p class="text-xl font-bold text-pragyan-blue">₹2001+</p>
+                        <p class="text-xs text-slate-400 mt-1">Custom</p>
+                    </div>
+                </div>
+
+                <!-- Custom Amount Input -->
+                <div>
+                    <input type="number" id="customAmount" min="1" placeholder="Enter custom amount (e.g., 2500)" class="block w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:ring-samrion-red focus:border-samrion-red" />
+                </div>
+            </div>
+
+            <!-- Step 2: Make Payment -->
+            <div class="mb-10 p-5 bg-bg-panel rounded-xl border border-slate-700 text-center">
+                <h3 class="text-xl font-bold text-pragyan-blue mb-6 flex items-center justify-center">
+                    <span class="bg-pragyan-blue text-white w-6 h-6 flex items-center justify-center rounded-full mr-3 text-sm font-bold">2</span> 
+                    Make Payment
+                </h3>
+                
+                <div class="p-6 bg-slate-800 rounded-xl border-2 border-samrion-red/50 shadow-lg mb-6">
+                    <p class="text-slate-300 mb-4 text-lg">Total Amount: <span id="displayAmount" class="text-pragyan-blue font-extrabold text-2xl ml-2">₹0.00</span></p>
+                    
+                    <!-- QR CODE PLACEMENT: Replace the src with your actual UPI QR Code image URL -->
+                    <img id="qrCodeImage" src="https://placehold.co/256x256/0EA5E9/ffffff?text=UPI+QR+CODE" alt="UPI QR Code" class="mx-auto w-48 h-48 rounded-lg shadow-xl mb-4" />
+                    
+                    <p class="text-white font-mono text-lg break-all bg-slate-700 p-2 rounded-md inline-block">
+                        <span class="text-xs text-slate-400 block">UPI ID:</span> nitinxaiml@upi
+                    </p>
+                </div>
+
+                <p class="text-sm text-samrion-red font-semibold">
+                    <i class="fa-solid fa-circle-exclamation mr-1"></i> IMPORTANT: Save the UTR/Transaction ID from your payment app.
+                </p>
+            </div>
+            
+            <!-- Step 3: Receipt Form -->
+            <div class="p-5 bg-bg-panel rounded-xl border border-slate-700">
+                <h3 class="text-xl font-bold text-pragyan-blue mb-4 flex items-center">
+                    <span class="bg-pragyan-blue text-white w-6 h-6 flex items-center justify-center rounded-full mr-3 text-sm font-bold">3</span> 
+                    Submit Details for Receipt
+                </h3>
+                
+                <form id="contributionForm" class="space-y-4">
+                    <div id="statusMessage" class="hidden p-3 rounded-lg font-medium text-sm"></div>
+
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-slate-300">Full Name</label>
+                        <input type="text" name="name" id="name" required class="mt-1 block w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-pragyan-blue focus:border-pragyan-blue" />
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-slate-300">Email Address (For receipt)</label>
+                        <input type="email" name="email" id="email" required class="mt-1 block w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-pragyan-blue focus:border-pragyan-blue" />
+                    </div>
+                    <div>
+                        <label for="txnId" class="block text-sm font-medium text-slate-300">UTR / Transaction ID</label>
+                        <input type="text" name="txnId" id="txnId" required class="mt-1 block w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-pragyan-blue focus:border-pragyan-blue" />
+                    </div>
+                    
+                    <!-- Hidden Field for Confirmed Amount -->
+                    <input type="hidden" id="finalAmount" name="finalAmount" value="0.00">
+
+                    <button type="submit" id="submitButton" disabled class="w-full flex justify-center items-center py-3 px-4 rounded-lg shadow-lg text-lg font-bold text-white bg-samrion-red hover:bg-samrion-red/90 focus:outline-none focus:ring-4 focus:ring-samrion-red/50 disabled:opacity-50 transition duration-150 transform hover:scale-[1.01]">
+                        <i class="fa-solid fa-check-circle mr-2"></i> Submit for Verification & Receipt
+                    </button>
+
+                    <p id="authUserId" class="text-xs text-slate-600 text-center break-all pt-2"></p>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, addDoc, collection, query, where, getDocs, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Setup Globals ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // Updated Firebase Config as fallback
+        const defaultFirebaseConfigJson = '{"apiKey": "AIzaSyAq-LjX9z7hEdsB_2oXTjfYFE77OT-3X0I", "authDomain": "pragyanalpha.firebaseapp.com", "projectId": "pragyanalpha", "storageBucket": "pragyanalpha.firebasestorage.app", "messagingSenderId": "788103367384", "appId": "1:788103367384:web:d742f0c8187bd1679c65ad", "measurementId": "G-RHZ4W6J7T0"}';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : defaultFirebaseConfigJson);
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        let db, auth;
+        let userId = null;
+        let isAuthReady = false;
+        let selectedAmount = 0;
+
+        // --- UI Elements ---
+        const form = document.getElementById('contributionForm');
+        const submitButton = document.getElementById('submitButton');
+        const statusMessage = document.getElementById('statusMessage');
+        const displayAmount = document.getElementById('displayAmount');
+        const finalAmountInput = document.getElementById('finalAmount');
+        const customAmountInput = document.getElementById('customAmount');
+        const tierCards = document.querySelectorAll('.tier-card');
+        const authUserId = document.getElementById('authUserId');
+
+
+        // --- UI Helpers ---
+        function showMessage(type, message) {
+            statusMessage.classList.remove('hidden', 'bg-red-500/20', 'text-red-300', 'bg-green-500/20', 'text-green-300', 'bg-yellow-500/20', 'text-yellow-300');
+            if (type === 'success') {
+                statusMessage.classList.add('bg-green-500/20', 'text-green-300');
+            } else if (type === 'error') {
+                statusMessage.classList.add('bg-red-500/20', 'text-red-300');
+            } else if (type === 'warning') {
+                statusMessage.classList.add('bg-yellow-500/20', 'text-yellow-300');
+            }
+            statusMessage.textContent = message;
+            statusMessage.classList.remove('hidden');
+        }
+
+        function updateAmount(amount) {
+            selectedAmount = amount;
+            displayAmount.textContent = `₹${selectedAmount.toFixed(2)}`;
+            finalAmountInput.value = selectedAmount;
+            
+            // Enable button only if amount is > 0 AND auth is ready
+            submitButton.disabled = selectedAmount <= 0 || !isAuthReady;
+            
+            // Highlight selected tier
+            tierCards.forEach(card => card.classList.remove('selected'));
+            const selectedCard = document.querySelector(`.tier-card[data-amount="${amount}"]`);
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
+            }
+        }
+
+        // --- Event Listeners ---
+        tierCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const amount = parseFloat(card.dataset.amount);
+                if (amount === 2001) {
+                    // Custom tier selected, focus on input
+                    customAmountInput.value = '';
+                    customAmountInput.focus();
+                    updateAmount(0); // Reset amount until user enters value
+                    card.classList.add('selected'); // Keep custom card highlighted
+                } else {
+                    customAmountInput.value = ''; // Clear custom input
+                    updateAmount(amount);
+                }
+            });
+        });
+
+        customAmountInput.addEventListener('input', () => {
+            const amount = parseFloat(customAmountInput.value);
+            // Remove selection from fixed tiers
+            tierCards.forEach(card => {
+                if (card.dataset.amount !== "2001") card.classList.remove('selected');
+            });
+            // Select the custom tier card
+            document.querySelector(`.tier-card[data-amount="2001"]`).classList.add('selected');
+
+            if (amount > 0) {
+                updateAmount(amount);
+            } else {
+                updateAmount(0);
+            }
+        });
+
+        // --- Firebase Initialization and Auth ---
+        async function initializeFirebase() {
+            try {
+                setLogLevel('debug');
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                    } else if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        userId = auth.currentUser.uid;
+                    } else {
+                        const anonUser = await signInAnonymously(auth);
+                        userId = anonUser.user.uid;
+                    }
+                    isAuthReady = true;
+                    authUserId.textContent = `Session ID: ${userId}`;
+                    if (selectedAmount > 0) submitButton.disabled = false;
+                });
+            } catch (e) {
+                console.error("Firebase setup failed:", e);
+                showMessage('error', "System Error: Could not connect to the database.");
+            }
+        }
+
+        // --- Duplicate UTR Check Logic ---
+        async function isTxnIdDuplicate(txnId) {
+            // We search across ALL users' receipts in the 'public' collection for UTR uniqueness
+            const receiptsPath = `artifacts/${appId}/public/data/all_receipts`;
+            const collectionRef = collection(db, receiptsPath);
+            
+            // Query for this Txn ID
+            const q = query(collectionRef, where('txnId', '==', txnId.trim()));
+            
+            try {
+                const querySnapshot = await getDocs(q);
+                // If a document with this UTR exists in the public unique list, it's a duplicate.
+                return !querySnapshot.empty; 
+            } catch (e) {
+                console.error("Error checking duplicate UTR:", e);
+                // Treat database error as non-duplicate to allow submission if possible (safeguard)
+                return false; 
+            }
+        }
+        
+        // --- Form Submission Logic ---
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!isAuthReady || !userId) {
+                showMessage('error', "Authentication not complete. Please wait a moment and try again.");
+                return;
+            }
+
+            if (selectedAmount <= 0) {
+                showMessage('warning', "Please choose or enter a valid contribution amount.");
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Verifying & Submitting...';
+            statusMessage.classList.add('hidden');
+
+            const txnId = document.getElementById('txnId').value.trim();
+
+            if (await isTxnIdDuplicate(txnId)) {
+                showMessage('error', "Error: This Transaction ID (UTR) has already been submitted. Please double-check the ID or contact support.");
+                submitButton.innerHTML = '<i class="fa-solid fa-check-circle mr-2"></i> Submit for Verification & Receipt';
+                submitButton.disabled = false;
+                return;
+            }
+
+            const data = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                amount: selectedAmount,
+                txnId: txnId,
+                userId: userId, // Store the contributor's session ID
+                timestamp: Date.now(),
+                status: 'Pending', // Crucial: Starts as Pending for admin review
+            };
+
+            try {
+                // 1. Save a copy of the receipt in the private user collection (for user reference)
+                const privateReceiptPath = `artifacts/${appId}/users/${userId}/receipts`;
+                await addDoc(collection(db, privateReceiptPath), data);
+                
+                // 2. Save a copy in the admin-accessible collection (for admin review/UTR check)
+                const adminReceiptPath = `artifacts/${appId}/users/${userId}/receipts`; // Use same collection as admin has permission to view all users' receipts
+                await addDoc(collection(db, adminReceiptPath), data); 
+
+                // 3. Save the UTR to a public collection for universal uniqueness checking (crucial for UPI payments)
+                const uniqueTxnRef = collection(db, `artifacts/${appId}/public/data/all_receipts`);
+                await addDoc(uniqueTxnRef, { txnId: txnId, timestamp: Date.now() });
+
+                showMessage('success', "Submission successful! We've saved your details. Your transaction will be manually verified shortly, and your confirmed receipt will be emailed to you.");
+                form.reset();
+                updateAmount(0); // Reset UI
+            } catch (e) {
+                console.error("Error saving receipt:", e);
+                showMessage('error', `Submission failed: ${e.message}. If the issue persists, please refresh.`);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="fa-solid fa-check-circle mr-2"></i> Submit for Verification & Receipt';
+            }
+        });
+
+        // Initialize with default 0 amount
+        updateAmount(0); 
+        initializeFirebase();
+    </script>
+</body>
+</html>
+
