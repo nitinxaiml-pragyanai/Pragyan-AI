@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pragyan AI Admin Panel (Restricted)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Outfit', sans-serif; }
+        .bg-bg-main { background-color: #0F172A; }
+        .bg-bg-card { background-color: #1E293B; }
+        .text-pragyan-blue { color: #0EA5E9; }
+        .bg-samrion-red { background-color: #E11D48; }
+        .hover\:bg-samrion-red-dark:hover { background-color: #881337; }
+    </style>
+</head>
+<body class="bg-bg-main text-slate-200 antialiased min-h-screen">
+
+    <div id="appRoot" class="max-w-7xl mx-auto p-4 sm:p-8">
+        <!-- Content will be rendered here -->
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInAnonymously, 
+            signInWithCustomToken, 
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            query, 
+            onSnapshot, 
+            doc, 
+            updateDoc, 
+            setLogLevel 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Setup Globals ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // Updated Firebase Config as fallback
+        const defaultFirebaseConfigJson = '{"apiKey": "AIzaSyAq-LjX9z7hEdsB_2oXTjfYFE77OT-3X0I", "authDomain": "pragyanalpha.firebaseapp.com", "projectId": "pragyanalpha", "storageBucket": "pragyanalpha.firebasestorage.app", "messagingSenderId": "788103367384", "appId": "1:788103367384:web:d742f0c8187bd1679c65ad", "measurementId": "G-RHZ4W6J7T0"}';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : defaultFirebaseConfigJson);
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        let db, auth;
+        let userId = null;
+        let isAuthReady = false;
+        let receipts = [];
+        let loading = true;
+        let error = null;
+
+        const appRoot = document.getElementById('appRoot');
+
+        // --- UI Rendering Functions ---
+
+        function renderLoading() {
+            appRoot.innerHTML = `
+                <div class="flex items-center justify-center h-96">
+                    <svg class="animate-spin h-10 w-10 text-pragyan-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="ml-3 text-lg text-slate-400">Loading Admin Data...</p>
+                </div>
+            `;
+        }
+
+        function renderError(message) {
+             appRoot.innerHTML = `
+                <div class="p-8 text-center text-red-400 bg-red-900/50 rounded-xl m-4 border border-red-700">
+                    <p class="font-bold">Error Loading Admin Panel:</p>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        function getRowStyle(status) {
+            switch (status) {
+                case 'Confirmed':
+                    return 'bg-green-900/20 text-green-300 border-l-4 border-green-500';
+                case 'Rejected':
+                    return 'bg-red-900/20 text-red-300 border-l-4 border-red-500';
+                case 'Pending':
+                    return 'bg-yellow-900/20 text-yellow-300 font-semibold border-l-4 border-yellow-500';
+                default:
+                    return 'bg-bg-card text-slate-400';
+            }
+        }
+        
+        function renderTable() {
+            if (error) return renderError(error);
+            if (loading) return renderLoading();
+
+            const pendingCount = receipts.filter(r => r.status === 'Pending').length;
+
+            const rows = receipts.map(receipt => {
+                const timestamp = receipt.timestamp ? new Date(receipt.timestamp).toLocaleDateString('en-IN') : 'N/A';
+                return `
+                    <tr class="${getRowStyle(receipt.status)}">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                receipt.status === 'Confirmed' ? 'bg-green-100 text-green-800' :
+                                receipt.status === 'Rejected' ? 'bg-red-100 text-red-800' :
+                                'bg-yellow-100 text-yellow-800'
+                            }">
+                                ${receipt.status}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold">₹${receipt.amount}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-mono break-all text-pragyan-blue">${receipt.txnId}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">${receipt.name}<br /><span class="text-xs text-slate-500">${receipt.email}</span></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-xs">${timestamp}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            ${receipt.status === 'Pending' ? `
+                                <div class="flex justify-end space-x-2">
+                                    <button onclick="handleConfirm('${receipt.id}')" class="px-3 py-1 text-xs font-bold text-white bg-green-600 rounded-md hover:bg-green-700 transition duration-150 shadow-md">
+                                        Confirm
+                                    </button>
+                                    <button onclick="handleReject('${receipt.id}')" class="px-3 py-1 text-xs font-bold text-white bg-red-600 rounded-md hover:bg-red-700 transition duration-150 shadow-md">
+                                        Reject
+                                    </button>
+                                </div>
+                            ` : `<span class="text-slate-500 text-xs italic">Reviewed</span>`}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            appRoot.innerHTML = `
+                <div class="text-slate-100">
+                    <header class="mb-8 p-6 bg-slate-800 rounded-xl shadow-lg border-b-4 border-pragyan-blue">
+                        <h1 class="text-3xl font-extrabold text-white">Pragyan AI Admin Panel</h1>
+                        <p class="text-pragyan-blue mt-2">
+                            Admin ID: <span class="font-mono text-sm break-all">${userId}</span>
+                        </p>
+                        <div class="mt-4 flex flex-wrap gap-4">
+                            <div class="p-3 bg-samrion-red rounded-lg text-white font-bold text-sm shadow-md">
+                                Pending Verifications: ${pendingCount}
+                            </div>
+                            <div class="p-3 bg-slate-600 rounded-lg text-white font-bold text-sm shadow-md">
+                                Total Receipts: ${receipts.length}
+                            </div>
+                        </div>
+                    </header>
+                    <div class="overflow-x-auto bg-slate-800 rounded-xl shadow-2xl">
+                        <table class="min-w-full divide-y divide-slate-700">
+                            <thead class="bg-slate-700">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Amount (Entered)</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">UTR / Txn ID</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Contributor</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Submitted</th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-700">
+                                ${rows}
+                            </tbody>
+                        </table>
+                    </div>
+                    ${receipts.length === 0 && `<div class="mt-8 p-6 bg-slate-800 rounded-xl text-center text-slate-400">No contribution receipts found yet.</div>`}
+                </div>
+            `;
+        }
+        
+        // --- Status Update Logic (Triggers SendGrid Function) ---
+        async function updateReceiptStatus(receiptId, newStatus) {
+            if (!db || !userId) {
+                console.error("Database or User ID not ready.");
+                return;
+            }
+
+            try {
+                const receiptPath = `artifacts/${appId}/users/${userId}/receipts`;
+                const receiptRef = doc(db, receiptPath, receiptId);
+                
+                // Temporarily disable buttons for the whole table while updating
+                document.querySelectorAll('button').forEach(btn => btn.disabled = true);
+                
+                await updateDoc(receiptRef, {
+                    status: newStatus,
+                    updatedAt: Date.now()
+                });
+                
+                // Re-enable buttons if update was successful (onSnapshot will re-render)
+                document.querySelectorAll('button').forEach(btn => btn.disabled = false);
+
+            } catch (e) {
+                console.error(`Error updating status to ${newStatus}:`, e);
+                error = `Failed to update status for receipt ${receiptId}.`;
+                renderTable(); // Re-render to show error
+            }
+        }
+        
+        window.handleConfirm = (id) => updateReceiptStatus(id, 'Confirmed');
+        window.handleReject = (id) => updateReceiptStatus(id, 'Rejected');
+
+
+        // --- Firebase Initialization and Auth ---
+        async function initializeFirebase() {
+            try {
+                setLogLevel('debug');
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                    } else if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        userId = auth.currentUser.uid;
+                    } else {
+                        const anonUser = await signInAnonymously(auth);
+                        userId = anonUser.user.uid;
+                    }
+                    isAuthReady = true;
+                    // Start data fetching once authenticated
+                    fetchReceipts();
+                });
+            } catch (e) {
+                console.error("Firebase setup failed:", e);
+                error = "Failed to initialize Firebase services.";
+                renderTable();
+            }
+        }
+
+        // --- Data Fetching (Real-time Snapshot) ---
+        function fetchReceipts() {
+            if (!db || !userId) return;
+
+            const receiptsPath = `artifacts/${appId}/users/${userId}/receipts`;
+            const q = query(collection(db, receiptsPath));
+
+            loading = true;
+            renderTable();
+
+            onSnapshot(q, (snapshot) => {
+                const fetchedReceipts = [];
+                snapshot.forEach((doc) => {
+                    fetchedReceipts.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // Sort: Pending first, then by timestamp
+                fetchedReceipts.sort((a, b) => {
+                    if (a.status === 'Pending' && b.status !== 'Pending') return -1;
+                    if (a.status !== 'Pending' && b.status === 'Pending') return 1;
+                    return (b.timestamp || 0) - (a.timestamp || 0);
+                });
+                
+                receipts = fetchedReceipts;
+                loading = false;
+                renderTable(); // Re-render on every data change
+
+            }, (err) => {
+                console.error("Error fetching receipts:", err);
+                error = "Could not load receipt data. Check Firebase rules.";
+                loading = false;
+                renderTable();
+            });
+        }
+
+        // Start the application
+        initializeFirebase();
+    </script>
+</body>
+</html>
+
