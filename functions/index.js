@@ -3,8 +3,7 @@
  * This function saves the receipt to Firestore and sends a confirmation email via SendGrid.
  */
 
-// Import only the necessary modules from firebase-functions and admin to satisfy the linter
-// Note: We are using destructuring for functions (https, logger)
+// Import only the necessary modules (https and logger) using destructuring to satisfy the linter
 const { https, logger } = require('firebase-functions');
 const admin = require('firebase-admin');
 
@@ -41,7 +40,6 @@ exports.submitReceipt = https.onRequest(async (req, res) => {
     }
 
     if (req.method !== 'POST') {
-        // Corrected spacing: {message:'...'}
         return res.status(405).send({message:'Method Not Allowed. Use POST.'});
     }
 
@@ -49,13 +47,11 @@ exports.submitReceipt = https.onRequest(async (req, res) => {
     const {name, email, amount, txnId} = req.body;
 
     if (!name || !email || !amount || !txnId) {
-        // Corrected spacing: {message:'...'}
         return res.status(400).json({message:'Missing required fields: name, email, amount, or UTR/Transaction ID.'});
     }
 
     const parsedAmount = parseFloat(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
-        // Corrected spacing: {message:'...'}
         return res.status(400).json({message:'Invalid contribution amount.'});
     }
 
@@ -64,7 +60,6 @@ exports.submitReceipt = https.onRequest(async (req, res) => {
     try {
         const qSnapshot = await uniqueTxnRef.where('txnId', '==', txnId.trim()).get();
         if (!qSnapshot.empty) {
-            // Corrected spacing: {message:'...'}
             return res.status(409).json({message:`Error: The Transaction ID ${txnId} has already been submitted.`});
         }
     } catch (error) {
@@ -87,7 +82,6 @@ exports.submitReceipt = https.onRequest(async (req, res) => {
         logger.info('Receipt saved to Firestore successfully.', {txnId, email});
     } catch (error) {
         logger.error('Firestore Save Error:', error);
-        // Corrected spacing: {message:'...'}
         return res.status(500).json({message:'Database error occurred. Receipt not saved.'});
     }
 
@@ -100,25 +94,22 @@ exports.submitReceipt = https.onRequest(async (req, res) => {
 
     // 6. Send Confirmation Email via SendGrid
     if (!sendGridKey) {
-        // Corrected spacing: {message:'...'}
         return res.status(200).json({message:'Submission successful, but email skipped due to missing API key.'});
     }
 
     // Email content (using your verified Single Sender email)
     const msg = {
         to: email,
-        from: 'nitinxaiml.pragyanai@gmail.com', 
+        from: 'nitinxai.ml@gmail.com', 
         subject: `Pragyan AI Contribution Received - Txn ID ${txnId}`,
-        html: `<p>Thank political. your generous contribution of <strong>₹${parsedAmount.toFixed(2)}</strong> to the Pragyan AI open-source project. Your details are being verified.</p>`,
+        html: `<p>Thank you for your generous contribution of <strong>₹${parsedAmount.toFixed(2)}</strong> to the Pragyan AI open-source project. Your details are being verified.</p>`,
     };
 
     try {
         await sgMail.send(msg);
-        // Corrected spacing: {message:'...'}
         return res.status(200).json({message:'Submission successful! Your receipt will be emailed after verification.'});
     } catch (error) {
         logger.error('SendGrid Email Error:', error.response?.body || error);
-        // Corrected spacing: {message:'...'}
         return res.status(200).json({message:'Submission successful, but email failed to send. We saved your details and will contact you.'});
     }
 });
